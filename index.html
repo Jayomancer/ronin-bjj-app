@@ -1039,7 +1039,12 @@ details.collapsible[open] .chevron { transform: rotate(180deg); }
                     this.userTechniques = data.userTechniques;
                     this.attendance = data.attendance || [];
                 } catch (err) {
+                    // Don't silently blank the whole diary/goals/attendance view on
+                    // a fetch error — that made a real backend error (like a missing
+                    // sheet tab) look exactly like "my data disappeared." Surface it
+                    // instead so it's obvious something failed, rather than confusing.
                     this.sessions = []; this.goals = []; this.userTechniques = []; this.attendance = [];
+                    alert('Could not load your training data: ' + err.message + '\n\nYour data is safe — this is a connection/setup issue, not data loss. Try refreshing; if it keeps happening, tell your admin.');
                 }
 
                 document.getElementById('navAdminBtn').classList.toggle('hidden', user.role !== 'admin');
