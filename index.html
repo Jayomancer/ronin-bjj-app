@@ -964,10 +964,19 @@ details.collapsible[open] .chevron { transform: rotate(180deg); }
                 if (!CONFIG.API_URL || CONFIG.API_URL.indexOf('PASTE_YOUR') === 0) {
                     throw new Error('CONFIG.API_URL is not set yet.');
                 }
-                const res = await fetch(CONFIG.API_URL, {
+                // Cache-busting: Apps Script Web App responses are served via a
+                // redirect to a script.googleusercontent.com content URL, and that
+                // response can get cached (by the browser, and/or by a shared
+                // cache/CDN in front of googleusercontent.com) if two requests ever
+                // look identical. `cache: 'no-store'` stops the browser from using
+                // or storing a cached copy, and the `_ts`/`_n` fields guarantee the
+                // request body (and therefore any content-addressed cache key) is
+                // never byte-identical between calls, even for the same action.
+                const res = await fetch(CONFIG.API_URL + '?_ts=' + Date.now(), {
                     method: 'POST',
                     headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                    body: JSON.stringify({ action, ...payload })
+                    cache: 'no-store',
+                    body: JSON.stringify({ action, ...payload, _ts: Date.now(), _n: Math.random().toString(36).slice(2) })
                 });
                 if (!res.ok) throw new Error('Network error (' + res.status + ')');
                 const json = await res.json();
