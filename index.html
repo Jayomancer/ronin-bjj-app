@@ -186,7 +186,7 @@ a { color: inherit; }
 .chip-gold.active { background: var(--gold); border-color: var(--gold); color: #1a1409; }
 
 .field { display: flex; flex-direction: column; gap: .3rem; }
-.field label { font-size: .66rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: .04em; }
+.field label, .field-label-text { font-size: .66rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: .04em; }
 .input, select.input, textarea.input { width: 100%; background: var(--surface-2); border: 1px solid var(--border); color: var(--text); border-radius: .65rem; padding: .6rem .75rem; font-size: .82rem; outline: none; transition: border-color .15s ease, box-shadow .15s ease; appearance: none; }
 select.input { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23a5a0a8' stroke-width='2.5'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right .6rem center; padding-right: 2rem; }
 .input:focus, select.input:focus, textarea.input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
@@ -222,9 +222,9 @@ select.input { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://ww
 @media (min-width: 768px) { .bottomnav { top: 3.8rem; bottom: auto; border-top: none; border-bottom: 1px solid var(--border-soft); } }
 .bottomnav-inner { max-width: 30rem; margin: 0 auto; display: flex; justify-content: space-around; align-items: center; height: 3.65rem; padding: 0 .2rem; }
 @media (min-width: 768px) { .bottomnav-inner { max-width: 56rem; justify-content: flex-start; gap: .5rem; padding: 0 1rem; } }
-.nav-item { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: .16rem; width: 100%; height: 100%; color: var(--text-faint); border: none; background: transparent; position: relative; }
-.nav-item svg { width: 1.3rem; height: 1.3rem; }
-.nav-item span { font-size: .58rem; font-weight: 700; }
+.nav-item { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: .14rem; width: 100%; height: 100%; min-width: 0; padding: 0 .1rem; color: var(--text-faint); border: none; background: transparent; position: relative; }
+.nav-item svg { width: 1.2rem; height: 1.2rem; flex-shrink: 0; }
+.nav-item span { font-size: .53rem; font-weight: 700; white-space: nowrap; }
 .nav-item.active { color: var(--accent-strong); }
 .nav-item.active::before { content: ""; position: absolute; top: -1px; width: 1.6rem; height: 2px; background: var(--accent); border-radius: 2px; }
 .nav-item.admin.active { color: var(--warning); }
@@ -251,6 +251,7 @@ select.input { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://ww
 .cal-day:active { transform: scale(0.92); }
 .cal-day.empty { visibility: hidden; cursor: default; }
 .cal-day.has-entry { border-color: var(--accent); background: var(--accent-soft); color: var(--accent-strong); }
+.cal-day.missed { border-color: var(--danger); color: var(--danger); opacity: .75; }
 .cal-day.today { border-style: dashed; border-color: var(--gold); }
 .cal-day.selected { box-shadow: 0 0 0 2px var(--bg), 0 0 0 4px var(--gold); }
 .cal-day .cal-dot { width: .3rem; height: .3rem; border-radius: 999px; background: var(--accent-strong); }
@@ -353,8 +354,8 @@ details.collapsible[open] .chevron { transform: rotate(180deg); }
                     <p class="text-xs text-muted mt-1 mb-2">Select profile & enter 4-digit PIN</p>
 
                     <div class="stack-2 mt-2">
-                        <select id="pinUserSelect" class="input"></select>
-                        <input type="password" inputmode="numeric" id="pinDigitInput" maxlength="4" placeholder="••••" class="input pin-input">
+                        <select id="pinUserSelect" class="input" aria-label="Select your profile"></select>
+                        <input type="password" inputmode="numeric" id="pinDigitInput" maxlength="4" placeholder="••••" class="input pin-input" aria-label="Enter your 4-digit PIN">
                         <button onclick="app.verifyPIN()" class="btn btn-primary btn-block btn-lg">Enter Journal</button>
                         <p id="pinError" class="hidden text-xs" style="color:var(--danger);">Incorrect PIN. Please try again.</p>
                         <button onclick="app.showCreateProfile()" class="link-btn flex items-center justify-center gap-1" style="width:100%;padding-top:.4rem;">
@@ -369,22 +370,22 @@ details.collapsible[open] .chevron { transform: rotate(180deg); }
                     <p class="text-xs text-muted text-center mt-1 mb-3">Takes about a minute — no email needed</p>
 
                     <form id="createProfileForm" onsubmit="app.submitCreateProfile(event)" class="stack-2">
-                        <div class="field"><label>Full Name</label><input type="text" id="cpName" required class="input"></div>
-                        <div class="field"><label>Nickname (optional)</label><input type="text" id="cpNickname" class="input"></div>
+                        <div class="field"><label for="cpName">Full Name</label><input type="text" id="cpName" required class="input"></div>
+                        <div class="field"><label for="cpNickname">Nickname (optional)</label><input type="text" id="cpNickname" class="input"></div>
                         <div class="grid-2">
-                            <div class="field"><label>Belt</label>
+                            <div class="field"><label for="cpBelt">Belt</label>
                                 <select id="cpBelt" class="input">
                                     <option value="White">White</option><option value="Blue">Blue</option><option value="Purple">Purple</option><option value="Brown">Brown</option><option value="Black">Black</option>
                                 </select>
                             </div>
-                            <div class="field"><label>Stripes</label>
+                            <div class="field"><label for="cpStripes">Stripes</label>
                                 <select id="cpStripes" class="input"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option></select>
                             </div>
                         </div>
-                        <div class="field"><label>Academy</label><input type="text" id="cpAcademy" value="Ronin Jiu-Jitsu Las Piñas" class="input"></div>
+                        <div class="field"><label for="cpAcademy">Academy</label><input type="text" id="cpAcademy" value="Ronin Jiu-Jitsu Las Piñas" class="input"></div>
                         <div class="grid-2">
-                            <div class="field"><label>Choose a 4-digit PIN</label><input type="password" inputmode="numeric" maxlength="4" id="cpPin" required class="input mono"></div>
-                            <div class="field"><label>Confirm PIN</label><input type="password" inputmode="numeric" maxlength="4" id="cpPinConfirm" required class="input mono"></div>
+                            <div class="field"><label for="cpPin">Choose a 4-digit PIN</label><input type="password" inputmode="numeric" maxlength="4" id="cpPin" required class="input mono"></div>
+                            <div class="field"><label for="cpPinConfirm">Confirm PIN</label><input type="password" inputmode="numeric" maxlength="4" id="cpPinConfirm" required class="input mono"></div>
                         </div>
                         <p id="createProfileError" class="hidden text-xs" style="color:var(--danger);">Something's not right — check the fields above.</p>
                         <button type="submit" class="btn btn-gold btn-block btn-lg mt-1">Create Profile & Enter</button>
@@ -434,19 +435,22 @@ details.collapsible[open] .chevron { transform: rotate(180deg); }
                 </div>
             </div>
 
-            <!-- Attendance Tracker -->
+            <!-- Attendance Tracker (compact — full view lives on its own tab) -->
             <div class="card stack-2">
                 <div class="section-head">
                     <h2 class="h2 flex items-center gap-2"><i data-lucide="check-square" style="width:15px;height:15px;color:var(--accent);"></i>Attendance</h2>
-                    <span id="attendanceMonthCount" class="text-xs text-faint mono">0 this month</span>
+                    <button onclick="app.navigateTo('attendance')" class="link-btn">View All</button>
                 </div>
-                <div id="attendanceDots" class="scroll-x no-scrollbar"></div>
-                <div id="attendanceDetail" class="hidden card-flat text-xs"></div>
-                <button id="attendanceCheckInBtn" onclick="app.checkInToday()" class="btn btn-secondary btn-block">
-                    <i data-lucide="check-circle" style="width:14px;height:14px;"></i>
-                    <span>Check In Today's Class</span>
-                </button>
-                <p class="text-xs text-faint text-center">Classes are Tuesdays & Thursdays · tap a date to see that day's entries</p>
+                <div class="grid-2 text-xs">
+                    <div class="card-flat" style="text-align:center;">
+                        <span class="eyebrow" style="font-size:.6rem;">Streak</span>
+                        <p id="homeAttStreak" class="h1 mono mt-1">0</p>
+                    </div>
+                    <div class="card-flat" style="text-align:center;">
+                        <span class="eyebrow" style="font-size:.6rem;">This Month</span>
+                        <p id="homeAttMonth" class="h1 mono mt-1">0</p>
+                    </div>
+                </div>
             </div>
 
             <!-- Current Focus -->
@@ -471,6 +475,14 @@ details.collapsible[open] .chevron { transform: rotate(180deg); }
                     </button>
                     <button onclick="app.openModal('AddTechnique')" class="btn btn-outline">
                         <i data-lucide="bookmark" style="width:14px;height:14px;"></i><span>New Technique</span>
+                    </button>
+                </div>
+                <div class="grid-2">
+                    <button onclick="app.openModal('RoundTimer')" class="btn btn-outline">
+                        <i data-lucide="timer" style="width:14px;height:14px;"></i><span>Round Timer</span>
+                    </button>
+                    <button onclick="app.openModal('RoundPairings')" class="btn btn-outline">
+                        <i data-lucide="shuffle" style="width:14px;height:14px;"></i><span>Round Pairings</span>
                     </button>
                 </div>
             </div>
@@ -550,7 +562,7 @@ details.collapsible[open] .chevron { transform: rotate(180deg); }
             <div class="stack-1">
                 <div style="position:relative;">
                     <i data-lucide="search" style="width:15px;height:15px;position:absolute;left:.75rem;top:.7rem;color:var(--text-faint);"></i>
-                    <input type="text" id="videoSearchInput" onkeyup="app.filterVideos()" placeholder="Search by technique, position (e.g., Half Guard)..." class="input" style="padding-left:2.2rem;">
+                    <input type="text" id="videoSearchInput" onkeyup="app.filterVideos()" placeholder="Search by technique, position (e.g., Half Guard)..." class="input" style="padding-left:2.2rem;" aria-label="Search videos">
                 </div>
                 <div class="scroll-x no-scrollbar">
                     <button onclick="app.setVideoCategoryFilter('all')" data-cat="all" class="vid-cat-btn chip active">All Categories</button>
@@ -585,9 +597,49 @@ details.collapsible[open] .chevron { transform: rotate(180deg); }
                     </button>
                 </div>
             </div>
+            <div style="position:relative;">
+                <i data-lucide="search" style="width:15px;height:15px;position:absolute;left:.75rem;top:.7rem;color:var(--text-faint);"></i>
+                <input type="text" id="diarySearchInput" oninput="app.filterDiarySearch()" placeholder="Search by technique, position, or partner..." class="input" style="padding-left:2.2rem;" aria-label="Search diary entries">
+            </div>
             <div id="diaryCalendar" class="hidden card"></div>
             <div id="diaryFilterBanner" class="hidden card-flat flex items-center justify-between text-xs"></div>
             <div id="diaryList" class="stack-2"></div>
+        </section>
+
+        <!-- ATTENDANCE VIEW -->
+        <section id="view-attendance" class="hidden stack-2">
+            <div class="section-head">
+                <div>
+                    <h1 class="h1">Attendance</h1>
+                    <p class="text-xs text-muted mt-1">Classes are Tuesdays & Thursdays</p>
+                </div>
+            </div>
+            <div class="grid-2 text-xs">
+                <div class="card-flat" style="text-align:center;">
+                    <span class="eyebrow" style="font-size:.6rem;">Current Streak</span>
+                    <p id="attStreakStat" class="h1 mono mt-1">0</p>
+                    <span class="text-xs text-faint">classes in a row</span>
+                </div>
+                <div class="card-flat" style="text-align:center;">
+                    <span class="eyebrow" style="font-size:.6rem;">This Month</span>
+                    <p id="attMonthStat" class="h1 mono mt-1">0</p>
+                    <span id="attMonthRate" class="text-xs text-faint">0% of classes this month</span>
+                </div>
+            </div>
+            <button id="attCheckInBtn" onclick="app.checkInToday()" class="btn btn-secondary btn-block">
+                <i data-lucide="check-circle" style="width:14px;height:14px;"></i>
+                <span>Check In Today's Class</span>
+            </button>
+            <div class="card">
+                <div class="cal-nav">
+                    <button type="button" onclick="app.changeAttCalMonth(-1)" class="icon-btn"><i data-lucide="chevron-left" style="width:16px;height:16px;"></i></button>
+                    <span id="attCalLabel" style="font-weight:800;font-size:.85rem;">—</span>
+                    <button type="button" onclick="app.changeAttCalMonth(1)" class="icon-btn"><i data-lucide="chevron-right" style="width:16px;height:16px;"></i></button>
+                </div>
+                <div id="attCalGrid" class="cal-grid"></div>
+                <p class="text-xs text-faint text-center mt-2">Tap a date to see that day's entries · red outline means a class day was missed</p>
+            </div>
+            <div id="attendanceDetail" class="hidden card-flat text-xs"></div>
         </section>
 
         <!-- PROFILE VIEW -->
@@ -597,25 +649,25 @@ details.collapsible[open] .chevron { transform: rotate(180deg); }
                     <h2 style="font-size:1.05rem;font-weight:800;">Practitioner Profile</h2>
                     <div class="flex items-center gap-2">
                         <button onclick="app.logout()" class="btn btn-ghost btn-sm"><i data-lucide="log-out" style="width:13px;height:13px;"></i><span>Log Out</span></button>
-                        <button onclick="app.saveProfileSettings()" class="btn btn-primary btn-sm">Save Changes</button>
+                        <button id="saveProfileBtn" onclick="app.saveProfileSettings()" class="btn btn-primary btn-sm">Save Changes</button>
                     </div>
                 </div>
                 <div class="grid-2">
-                    <div class="field"><label>Full Name</label><input type="text" id="profNameInput" class="input"></div>
-                    <div class="field"><label>Nickname</label><input type="text" id="profNickInput" class="input"></div>
-                    <div class="field"><label>Current Belt Level</label>
+                    <div class="field"><label for="profNameInput">Full Name</label><input type="text" id="profNameInput" class="input"></div>
+                    <div class="field"><label for="profNickInput">Nickname</label><input type="text" id="profNickInput" class="input"></div>
+                    <div class="field"><label for="profBeltSelect">Current Belt Level</label>
                         <select id="profBeltSelect" class="input">
                             <option value="White">White Belt</option><option value="Blue">Blue Belt</option><option value="Purple">Purple Belt</option><option value="Brown">Brown Belt</option><option value="Black">Black Belt</option>
                         </select>
                     </div>
-                    <div class="field"><label>Stripes / Degrees</label>
+                    <div class="field"><label for="profStripesSelect">Stripes / Degrees</label>
                         <select id="profStripesSelect" class="input">
                             <option value="0">0 Stripes / Degrees</option><option value="1">1 Stripe / Degree</option><option value="2">2 Stripes / Degrees</option><option value="3">3 Stripes / Degrees</option><option value="4">4 Stripes / Degrees</option>
                         </select>
                     </div>
-                    <div class="field" style="grid-column:1/-1;"><label>Academy</label><input type="text" id="profAcademyInput" class="input"></div>
-                    <div class="field"><label>Current PIN (required to save any change)</label><input type="password" maxlength="4" inputmode="numeric" id="profCurrentPinInput" placeholder="••••" class="input mono"></div>
-                    <div class="field"><label>New PIN (only fill in to change it)</label><input type="password" maxlength="4" inputmode="numeric" id="profNewPinInput" placeholder="Leave blank to keep current" class="input mono"></div>
+                    <div class="field" style="grid-column:1/-1;"><label for="profAcademyInput">Academy</label><input type="text" id="profAcademyInput" class="input"></div>
+                    <div class="field"><label for="profCurrentPinInput">Current PIN (required to save any change)</label><input type="password" maxlength="4" inputmode="numeric" id="profCurrentPinInput" placeholder="••••" class="input mono"></div>
+                    <div class="field"><label for="profNewPinInput">New PIN (only fill in to change it)</label><input type="password" maxlength="4" inputmode="numeric" id="profNewPinInput" placeholder="Leave blank to keep current" class="input mono"></div>
                 </div>
             </div>
         </section>
@@ -668,6 +720,10 @@ details.collapsible[open] .chevron { transform: rotate(180deg); }
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="3" width="16" height="18" rx="2"/><line x1="8" y1="9" x2="16" y2="9"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="13" y2="17"/></svg>
                 <span>Diary</span>
             </button>
+            <button onclick="app.navigateTo('attendance')" class="nav-item" data-view="attendance">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="16" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="8" y1="3" x2="8" y2="7"/><line x1="16" y1="3" x2="16" y2="7"/><polyline points="8.5 15 11 17.5 16 12.5"/></svg>
+                <span>Attend</span>
+            </button>
             <button onclick="app.navigateTo('profile')" class="nav-item" data-view="profile">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a8 8 0 0 1 16 0v1"/><line x1="6" y1="16.2" x2="18" y2="16.2"/></svg>
                 <span>Profile</span>
@@ -688,19 +744,20 @@ details.collapsible[open] .chevron { transform: rotate(180deg); }
             </div>
             <form id="logSessionForm" onsubmit="app.handleSessionSubmit(event)" class="stack-2">
                 <input type="hidden" id="logSessionId">
+                <div id="strugglingTip" class="hidden"></div>
                 <div class="grid-2">
-                    <div class="field"><label>Date</label><input type="date" id="logDate" required class="input"></div>
-                    <div class="field"><label>Type</label>
+                    <div class="field"><label for="logDate">Date</label><input type="date" id="logDate" required class="input"></div>
+                    <div class="field"><label for="logGiNoGi">Type</label>
                         <select id="logGiNoGi" class="input"><option value="Gi">Gi</option><option value="No-Gi">No-Gi</option><option value="MMA">MMA</option></select>
                     </div>
                 </div>
-                <div class="field"><label>Primary Technique / Position Covered</label>
+                <div class="field"><label for="logPosition">Primary Technique / Position Covered</label>
                     <select id="logPosition" class="input">
                         <option value="Half Guard">Half Guard</option><option value="Closed Guard">Closed Guard</option><option value="Side Control Escape">Side Control Escape</option><option value="Mount Escapes">Mount Escapes</option><option value="Back Control">Back Control</option><option value="De La Riva">De La Riva</option><option value="Takedowns / Wrestling">Takedowns / Wrestling</option>
                     </select>
                 </div>
                 <div class="field">
-                    <label>Activities Included</label>
+                    <span class="field-label-text">Activities Included</span>
                     <div class="flex gap-3">
                         <label class="checkbox-row"><input type="checkbox" id="chkTechnique"><span>Technique</span></label>
                         <label class="checkbox-row"><input type="checkbox" id="chkPositional"><span>Positional</span></label>
@@ -711,9 +768,9 @@ details.collapsible[open] .chevron { transform: rotate(180deg); }
                 <div class="card-flat stack-1">
                     <span class="eyebrow">Positional Rounds Tracker</span>
                     <div class="grid-3">
-                        <div class="field"><label>Rounds</label><input type="text" inputmode="numeric" id="logPosRounds" placeholder="0" class="input num-input"></div>
-                        <div class="field"><label>Successes</label><input type="text" inputmode="numeric" id="logPosSuccess" placeholder="0" class="input num-input"></div>
-                        <div class="field"><label>Failures</label><input type="text" inputmode="numeric" id="logPosFail" placeholder="0" class="input num-input"></div>
+                        <div class="field"><label for="logPosRounds">Rounds</label><input type="text" inputmode="numeric" id="logPosRounds" placeholder="0" class="input num-input"></div>
+                        <div class="field"><label for="logPosSuccess">Successes</label><input type="text" inputmode="numeric" id="logPosSuccess" placeholder="0" class="input num-input"></div>
+                        <div class="field"><label for="logPosFail">Failures</label><input type="text" inputmode="numeric" id="logPosFail" placeholder="0" class="input num-input"></div>
                     </div>
                     <details id="positionalDetails" class="collapsible">
                         <summary><svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg><span>Who did you drill with? (optional)</span></summary>
@@ -727,9 +784,9 @@ details.collapsible[open] .chevron { transform: rotate(180deg); }
                 <div class="card-flat stack-1">
                     <span class="eyebrow">Sparring Tracker</span>
                     <div class="grid-3">
-                        <div class="field"><label>Wins (Subs)</label><input type="text" inputmode="numeric" id="logSparWins" placeholder="0" class="input num-input"></div>
-                        <div class="field"><label>Losses (Tapped)</label><input type="text" inputmode="numeric" id="logSparLosses" placeholder="0" class="input num-input"></div>
-                        <div class="field"><label>Neutral Rolls</label><input type="text" inputmode="numeric" id="logSparNeutral" placeholder="0" class="input num-input"></div>
+                        <div class="field"><label for="logSparWins">Wins (Subs)</label><input type="text" inputmode="numeric" id="logSparWins" placeholder="0" class="input num-input"></div>
+                        <div class="field"><label for="logSparLosses">Losses (Tapped)</label><input type="text" inputmode="numeric" id="logSparLosses" placeholder="0" class="input num-input"></div>
+                        <div class="field"><label for="logSparNeutral">Neutral Rolls</label><input type="text" inputmode="numeric" id="logSparNeutral" placeholder="0" class="input num-input"></div>
                     </div>
                     <details id="sparringDetails" class="collapsible">
                         <summary><svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg><span>Who did you spar with? (optional)</span></summary>
@@ -741,8 +798,8 @@ details.collapsible[open] .chevron { transform: rotate(180deg); }
                 </div>
 
                 <div class="stack-1">
-                    <div class="field"><label>What went wrong / main difficulty?</label><input type="text" id="logReflectWrong" placeholder="e.g. Kept losing underhook on bottom..." class="input"></div>
-                    <div class="field"><label>What to focus on next time?</label><input type="text" id="logReflectNext" placeholder="e.g. Frame early and swim underhook..." class="input"></div>
+                    <div class="field"><label for="logReflectWrong">What went wrong / main difficulty?</label><input type="text" id="logReflectWrong" placeholder="e.g. Kept losing underhook on bottom..." class="input"></div>
+                    <div class="field"><label for="logReflectNext">What to focus on next time?</label><input type="text" id="logReflectNext" placeholder="e.g. Frame early and swim underhook..." class="input"></div>
                 </div>
 
                 <div class="flex gap-2">
@@ -763,16 +820,16 @@ details.collapsible[open] .chevron { transform: rotate(180deg); }
                 <button onclick="app.closeModal('PartnerLog')" class="icon-btn"><i data-lucide="x"></i></button>
             </div>
             <form id="partnerLogForm" onsubmit="app.submitPartnerLog(event)" class="stack-2">
-                <div class="field"><label>Partner Name</label><input list="partnerNamesList" type="text" id="plPartner" required placeholder="Who did you roll with?" class="input"></div>
-                <div class="field"><label>Date</label><input type="date" id="plDate" required class="input"></div>
-                <div class="field"><label>Section</label>
+                <div class="field"><label for="plPartner">Partner Name</label><input list="partnerNamesList" type="text" id="plPartner" required placeholder="Who did you roll with?" class="input"></div>
+                <div class="field"><label for="plDate">Date</label><input type="date" id="plDate" required class="input"></div>
+                <div class="field"><label for="plSection">Section</label>
                     <select id="plSection" class="input" onchange="app.updatePartnerLogOutcomes()">
                         <option value="sparring">Sparring</option>
                         <option value="positional">Positional</option>
                     </select>
                 </div>
-                <div class="field"><label>Outcome</label><select id="plOutcome" class="input"></select></div>
-                <div class="field"><label>Note (optional)</label><input type="text" id="plNote" placeholder="Anything worth remembering" class="input"></div>
+                <div class="field"><label for="plOutcome">Outcome</label><select id="plOutcome" class="input"></select></div>
+                <div class="field"><label for="plNote">Note (optional)</label><input type="text" id="plNote" placeholder="Anything worth remembering" class="input"></div>
                 <button type="submit" class="btn btn-primary btn-block">Save Roll</button>
             </form>
         </div>
@@ -786,8 +843,8 @@ details.collapsible[open] .chevron { transform: rotate(180deg); }
                 <button onclick="app.closeModal('AddGoal')" class="icon-btn"><i data-lucide="x"></i></button>
             </div>
             <form id="addGoalForm" onsubmit="app.submitAddGoal(event)" class="stack-2">
-                <div class="field"><label>Goal Title</label><input type="text" id="goalTitle" required placeholder="e.g. Escape Mount 10 times" class="input"></div>
-                <div class="field"><label>Target Count</label><input type="text" inputmode="numeric" id="goalTarget" placeholder="10" required class="input num-input"></div>
+                <div class="field"><label for="goalTitle">Goal Title</label><input type="text" id="goalTitle" required placeholder="e.g. Escape Mount 10 times" class="input"></div>
+                <div class="field"><label for="goalTarget">Target Count</label><input type="text" inputmode="numeric" id="goalTarget" placeholder="10" required class="input num-input"></div>
                 <button type="submit" class="btn btn-gold btn-block">Add Goal</button>
             </form>
         </div>
@@ -801,14 +858,81 @@ details.collapsible[open] .chevron { transform: rotate(180deg); }
                 <button onclick="app.closeModal('AddTechnique')" class="icon-btn"><i data-lucide="x"></i></button>
             </div>
             <form id="addTechniqueForm" onsubmit="app.submitAddTechnique(event)" class="stack-2">
-                <div class="field"><label>Technique Name</label><input type="text" id="techName" required placeholder="e.g. Knee Cut Pass" class="input"></div>
-                <div class="field"><label>Position</label><input type="text" id="techPosition" placeholder="e.g. Half Guard Top" class="input"></div>
-                <div class="field"><label>Confidence</label>
+                <div class="field"><label for="techName">Technique Name</label><input type="text" id="techName" required placeholder="e.g. Knee Cut Pass" class="input"></div>
+                <div class="field"><label for="techPosition">Position</label><input type="text" id="techPosition" placeholder="e.g. Half Guard Top" class="input"></div>
+                <div class="field"><label for="techConfidence">Confidence</label>
                     <select id="techConfidence" class="input"><option value="Learning">Learning</option><option value="Comfortable">Comfortable</option><option value="Struggling">Struggling</option></select>
                 </div>
-                <div class="field"><label>Notes</label><input type="text" id="techNotes" placeholder="Key detail to remember" class="input"></div>
+                <div class="field"><label for="techNotes">Notes</label><input type="text" id="techNotes" placeholder="Key detail to remember" class="input"></div>
                 <button type="submit" class="btn btn-gold btn-block">Save to Journal</button>
             </form>
+        </div>
+    </div>
+
+    <!-- ROUND TIMER MODAL -->
+    <div id="modalRoundTimer" class="hidden modal-overlay">
+        <div class="modal-panel narrow">
+            <div class="modal-header">
+                <h3><i data-lucide="timer" style="width:16px;height:16px;color:var(--accent);"></i><span>Round Timer</span></h3>
+                <button onclick="app.closeRoundTimer()" class="icon-btn"><i data-lucide="x"></i></button>
+            </div>
+            <div id="rtSetup" class="stack-2">
+                <div class="grid-2">
+                    <div class="field"><label for="rtRoundMin">Round (min:sec)</label>
+                        <div class="flex items-center gap-1">
+                            <input type="text" inputmode="numeric" id="rtRoundMin" class="input num-input" value="5" style="text-align:center;">
+                            <span class="text-faint">:</span>
+                            <input type="text" inputmode="numeric" id="rtRoundSec" class="input num-input" value="00" style="text-align:center;" aria-label="Round seconds">
+                        </div>
+                    </div>
+                    <div class="field"><label for="rtRestMin">Rest (min:sec)</label>
+                        <div class="flex items-center gap-1">
+                            <input type="text" inputmode="numeric" id="rtRestMin" class="input num-input" value="1" style="text-align:center;">
+                            <span class="text-faint">:</span>
+                            <input type="text" inputmode="numeric" id="rtRestSec" class="input num-input" value="00" style="text-align:center;" aria-label="Rest seconds">
+                        </div>
+                    </div>
+                </div>
+                <div class="field"><label for="rtRounds">Number of Rounds</label><input type="text" inputmode="numeric" id="rtRounds" class="input num-input" value="6"></div>
+                <button onclick="app.startRoundTimer()" class="btn btn-primary btn-block btn-lg">
+                    <i data-lucide="play" style="width:16px;height:16px;"></i><span>Start</span>
+                </button>
+            </div>
+            <div id="rtRunning" class="hidden stack-2" style="text-align:center;">
+                <span id="rtPhaseLabel" class="badge badge-accent" style="font-size:.8rem;letter-spacing:.05em;">ROUND</span>
+                <p id="rtClock" class="mono" style="font-size:3.4rem;font-weight:800;margin:.2rem 0;">05:00</p>
+                <p id="rtRoundCount" class="text-xs text-faint">Round 1 of 6</p>
+                <div class="grid-2">
+                    <button id="rtPauseBtn" onclick="app.pauseResumeRoundTimer()" class="btn btn-outline">
+                        <i data-lucide="pause" style="width:14px;height:14px;"></i><span>Pause</span>
+                    </button>
+                    <button onclick="app.resetRoundTimer()" class="btn btn-outline">
+                        <i data-lucide="rotate-ccw" style="width:14px;height:14px;"></i><span>Reset</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ROUND PAIRINGS MODAL -->
+    <div id="modalRoundPairings" class="hidden modal-overlay">
+        <div class="modal-panel narrow">
+            <div class="modal-header">
+                <h3><i data-lucide="shuffle" style="width:16px;height:16px;color:var(--accent);"></i><span>Round Pairings</span></h3>
+                <button onclick="app.closeModal('RoundPairings')" class="icon-btn"><i data-lucide="x"></i></button>
+            </div>
+            <div class="stack-2">
+                <p class="text-xs text-muted">Checked in today, auto-detected from attendance and logged sessions. Uncheck anyone sitting out, or add a name manually (visitors, walk-ins, or anyone who forgot to check in).</p>
+                <div id="rpRosterList" class="stack-1"></div>
+                <div class="flex items-center gap-1">
+                    <input type="text" id="rpManualName" class="input" placeholder="Add a name..." aria-label="Add a name manually">
+                    <button onclick="app.addManualRosterName()" class="btn btn-outline btn-sm" style="flex-shrink:0;">Add</button>
+                </div>
+                <button onclick="app.shuffleRoundPairings()" class="btn btn-primary btn-block btn-lg">
+                    <i data-lucide="shuffle" style="width:16px;height:16px;"></i><span>Shuffle Pairings</span>
+                </button>
+                <div id="rpPairingsResult" class="stack-1"></div>
+            </div>
         </div>
     </div>
 
@@ -820,7 +944,7 @@ details.collapsible[open] .chevron { transform: rotate(180deg); }
             </div>
             <h3 class="mt-2" style="font-size:1rem;font-weight:800;">Confirm Admin Access</h3>
             <p class="text-xs text-muted mt-1">Re-enter your PIN to open the admin panel this session.</p>
-            <input type="password" inputmode="numeric" maxlength="4" id="adminAuthPin" placeholder="••••" class="input pin-input mt-2">
+            <input type="password" inputmode="numeric" maxlength="4" id="adminAuthPin" placeholder="••••" class="input pin-input mt-2" aria-label="Enter admin PIN">
             <p id="adminAuthError" class="hidden text-xs mt-1" style="color:var(--danger);">Incorrect PIN or not an admin account.</p>
             <div class="flex gap-2 mt-2">
                 <button onclick="app.closeModal('AdminAuth'); app.navigateTo('home')" class="btn btn-secondary flex-1">Cancel</button>
@@ -839,13 +963,13 @@ details.collapsible[open] .chevron { transform: rotate(180deg); }
             <form id="adminClassForm" onsubmit="app.submitAdminClass(event)" class="stack-2">
                 <input type="hidden" id="acId">
                 <div class="grid-2">
-                    <div class="field"><label>Date</label><input type="date" id="acDate" required class="input"></div>
-                    <div class="field"><label>Type</label><select id="acGi" class="input"><option value="Gi">Gi</option><option value="No-Gi">No-Gi</option><option value="MMA">MMA</option></select></div>
+                    <div class="field"><label for="acDate">Date</label><input type="date" id="acDate" required class="input"></div>
+                    <div class="field"><label for="acGi">Type</label><select id="acGi" class="input"><option value="Gi">Gi</option><option value="No-Gi">No-Gi</option><option value="MMA">MMA</option></select></div>
                 </div>
-                <div class="field"><label>Class Title</label><input type="text" id="acTitle" required placeholder="e.g. Half Guard Underhook & Sweeps" class="input"></div>
-                <div class="field"><label>Instructor</label><input type="text" id="acInstructor" class="input"></div>
+                <div class="field"><label for="acTitle">Class Title</label><input type="text" id="acTitle" required placeholder="e.g. Half Guard Underhook & Sweeps" class="input"></div>
+                <div class="field"><label for="acInstructor">Instructor</label><input type="text" id="acInstructor" class="input"></div>
                 <div class="field">
-                    <label>Category (pick one or more)</label>
+                    <span class="field-label-text">Category (pick one or more)</span>
                     <div class="grid-2 card-flat">
                         <label class="checkbox-row"><input type="checkbox" class="ac-category-chk" value="Technique"><span>Technique</span></label>
                         <label class="checkbox-row"><input type="checkbox" class="ac-category-chk" value="Positional"><span>Positional</span></label>
@@ -853,9 +977,9 @@ details.collapsible[open] .chevron { transform: rotate(180deg); }
                         <label class="checkbox-row"><input type="checkbox" class="ac-category-chk" value="Bloopers"><span>Bloopers</span></label>
                     </div>
                 </div>
-                <div class="field"><label>Techniques Taught (comma separated)</label><input type="text" id="acTechniques" placeholder="e.g. Half Guard Underhook, Dogfight Transition" class="input"></div>
+                <div class="field"><label for="acTechniques">Techniques Taught (comma separated)</label><input type="text" id="acTechniques" placeholder="e.g. Half Guard Underhook, Dogfight Transition" class="input"></div>
                 <div class="field">
-                    <label>Linked Videos</label>
+                    <span class="field-label-text">Linked Videos</span>
                     <div id="acVideoChecklist" class="card-flat stack-1" style="max-height:10rem;overflow-y:auto;"></div>
                 </div>
                 <button type="submit" class="btn btn-primary btn-block">Save Class</button>
@@ -872,17 +996,17 @@ details.collapsible[open] .chevron { transform: rotate(180deg); }
             </div>
             <form id="adminVideoForm" onsubmit="app.submitAdminVideo(event)" class="stack-2">
                 <input type="hidden" id="avId">
-                <div class="field"><label>Video Title</label><input type="text" id="avTitle" required class="input"></div>
+                <div class="field"><label for="avTitle">Video Title</label><input type="text" id="avTitle" required class="input"></div>
                 <div class="grid-2">
-                    <div class="field"><label>Technique</label><input type="text" id="avTechnique" class="input"></div>
-                    <div class="field"><label>Position</label><input type="text" id="avPosition" class="input"></div>
+                    <div class="field"><label for="avTechnique">Technique</label><input type="text" id="avTechnique" class="input"></div>
+                    <div class="field"><label for="avPosition">Position</label><input type="text" id="avPosition" class="input"></div>
                 </div>
                 <div class="grid-3">
-                    <div class="field"><label>Category</label><select id="avCategory" class="input"><option value="Technique">Technique</option><option value="Positional">Positional</option><option value="Sparring">Sparring</option><option value="Bloopers">Bloopers</option></select></div>
-                    <div class="field"><label>Type</label><select id="avType" class="input"><option value="Gi">Gi</option><option value="No-Gi">No-Gi</option><option value="MMA">MMA</option></select></div>
-                    <div class="field"><label>Date</label><input type="date" id="avDate" class="input"></div>
+                    <div class="field"><label for="avCategory">Category</label><select id="avCategory" class="input"><option value="Technique">Technique</option><option value="Positional">Positional</option><option value="Sparring">Sparring</option><option value="Bloopers">Bloopers</option></select></div>
+                    <div class="field"><label for="avType">Type</label><select id="avType" class="input"><option value="Gi">Gi</option><option value="No-Gi">No-Gi</option><option value="MMA">MMA</option></select></div>
+                    <div class="field"><label for="avDate">Date</label><input type="date" id="avDate" class="input"></div>
                 </div>
-                <div class="field"><label>Facebook Reel Link</label><input type="url" id="avFbUrl" required placeholder="https://www.facebook.com/reel/..." class="input"></div>
+                <div class="field"><label for="avFbUrl">Facebook Reel Link</label><input type="url" id="avFbUrl" required placeholder="https://www.facebook.com/reel/..." class="input"></div>
                 <button type="submit" class="btn btn-primary btn-block">Save Video</button>
             </form>
         </div>
@@ -897,14 +1021,14 @@ details.collapsible[open] .chevron { transform: rotate(180deg); }
             </div>
             <form id="adminEditUserForm" onsubmit="app.submitAdminEditUser(event)" class="stack-2">
                 <input type="hidden" id="auId">
-                <div class="field"><label>Full Name</label><input type="text" id="auName" required class="input"></div>
-                <div class="field"><label>Nickname</label><input type="text" id="auNickname" class="input"></div>
+                <div class="field"><label for="auName">Full Name</label><input type="text" id="auName" required class="input"></div>
+                <div class="field"><label for="auNickname">Nickname</label><input type="text" id="auNickname" class="input"></div>
                 <div class="grid-2">
-                    <div class="field"><label>Belt</label><select id="auBelt" class="input"><option value="White">White</option><option value="Blue">Blue</option><option value="Purple">Purple</option><option value="Brown">Brown</option><option value="Black">Black</option></select></div>
-                    <div class="field"><label>Stripes</label><select id="auStripes" class="input"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option></select></div>
+                    <div class="field"><label for="auBelt">Belt</label><select id="auBelt" class="input"><option value="White">White</option><option value="Blue">Blue</option><option value="Purple">Purple</option><option value="Brown">Brown</option><option value="Black">Black</option></select></div>
+                    <div class="field"><label for="auStripes">Stripes</label><select id="auStripes" class="input"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option></select></div>
                 </div>
-                <div class="field"><label>Academy</label><input type="text" id="auAcademy" class="input"></div>
-                <div class="field"><label>Role</label><select id="auRole" class="input"><option value="member">Member</option><option value="admin">Admin / Coach</option></select></div>
+                <div class="field"><label for="auAcademy">Academy</label><input type="text" id="auAcademy" class="input"></div>
+                <div class="field"><label for="auRole">Role</label><select id="auRole" class="input"><option value="member">Member</option><option value="admin">Admin / Coach</option></select></div>
                 <button type="submit" class="btn btn-primary btn-block">Save Member</button>
             </form>
         </div>
@@ -946,6 +1070,12 @@ details.collapsible[open] .chevron { transform: rotate(180deg); }
                 this.diaryView = 'list'; // 'list' or 'calendar'
                 this.diaryCalMonth = null; // Date set to the 1st of the month currently shown; set lazily on first calendar render
                 this.selectedDiaryDate = null;
+                this.diarySearchQuery = '';
+                this.attCalMonth = null; // same idea, for the Attendance tab's calendar
+                this.rtInterval = null;
+                this.rtState = null;
+                this.audioCtx = null;
+                this.rpRoster = [];
 
                 this.initThemeToggle();
                 this.initNumericInputs();
@@ -1144,6 +1274,7 @@ details.collapsible[open] .chevron { transform: rotate(180deg); }
                     return;
                 }
 
+                const restore = this.setBtnLoading(e.target.querySelector('button[type="submit"]'), 'Creating...');
                 try {
                     const user = await this.api('createProfile', {
                         name: document.getElementById('cpName').value,
@@ -1161,12 +1292,14 @@ details.collapsible[open] .chevron { transform: rotate(180deg); }
                 } catch (err) {
                     errEl.textContent = err.message || 'Could not create profile.';
                     errEl.classList.remove('hidden');
+                } finally {
+                    restore();
                 }
             }
 
             // ---------------- NAVIGATION ----------------
             hideAllViews() {
-                ['home', 'classes', 'class-detail', 'videos', 'diary', 'profile', 'admin'].forEach(v => {
+                ['home', 'classes', 'class-detail', 'videos', 'diary', 'attendance', 'profile', 'admin'].forEach(v => {
                     const el = document.getElementById(`view-${v}`);
                     if (el) el.classList.add('hidden');
                 });
@@ -1190,6 +1323,12 @@ details.collapsible[open] .chevron { transform: rotate(180deg); }
                     } else {
                         this.loadAdminData();
                     }
+                }
+
+                if (viewId === 'attendance') {
+                    this.updateAttendanceSummary();
+                    this.renderAttendanceCalendar();
+                    this.renderAttendanceDetail();
                 }
 
                 window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -1224,7 +1363,7 @@ details.collapsible[open] .chevron { transform: rotate(180deg); }
                 }
 
                 this.updateFocusInsight();
-                this.renderAttendance();
+                this.updateAttendanceSummary();
                 this.renderGoals();
                 this.renderPersonalJournal();
                 this.renderPartners();
@@ -1268,24 +1407,6 @@ details.collapsible[open] .chevron { transform: rotate(180deg); }
             }
 
             // ---------------- ATTENDANCE ----------------
-            getRecentClassDays(count) {
-                const days = [];
-                const cursor = new Date();
-                cursor.setHours(0, 0, 0, 0);
-                let guard = 0;
-                while (days.length < count && guard < 60) {
-                    if (CONFIG.CLASS_DAYS.includes(cursor.getDay())) {
-                        const y = cursor.getFullYear();
-                        const m = String(cursor.getMonth() + 1).padStart(2, '0');
-                        const d = String(cursor.getDate()).padStart(2, '0');
-                        days.unshift(`${y}-${m}-${d}`);
-                    }
-                    cursor.setDate(cursor.getDate() - 1);
-                    guard++;
-                }
-                return days;
-            }
-
             todayStr() {
                 const d = new Date();
                 return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
@@ -1299,56 +1420,134 @@ details.collapsible[open] .chevron { transform: rotate(180deg); }
                 return set;
             }
 
-            renderAttendance() {
+            // Consecutive class days (Tue/Thu) attended, walking back from today.
+            // Today itself doesn't break the streak if it just hasn't happened yet.
+            computeAttendanceStreak() {
+                const attended = this.getAttendedDateSet();
                 const today = this.todayStr();
-                const attendedDates = this.getAttendedDateSet();
-                const recentDays = this.getRecentClassDays(8);
+                const cursor = new Date();
+                cursor.setHours(0, 0, 0, 0);
+                let streak = 0;
+                let guard = 0;
+                while (guard < 400) {
+                    if (CONFIG.CLASS_DAYS.includes(cursor.getDay())) {
+                        const y = cursor.getFullYear(), m = String(cursor.getMonth() + 1).padStart(2, '0'), d = String(cursor.getDate()).padStart(2, '0');
+                        const dateStr = `${y}-${m}-${d}`;
+                        if (attended.has(dateStr)) {
+                            streak++;
+                        } else if (dateStr !== today) {
+                            break;
+                        }
+                    }
+                    cursor.setDate(cursor.getDate() - 1);
+                    guard++;
+                }
+                return streak;
+            }
 
-                const dotsEl = document.getElementById('attendanceDots');
-                dotsEl.innerHTML = recentDays.map(date => {
-                    const attended = attendedDates.has(date);
-                    const isToday = date === today;
-                    const label = date.slice(5).replace('-', '/');
-                    let cls = 'att-dot';
-                    if (attended) cls += ' attended';
-                    else if (isToday) cls += ' today-pending';
-                    if (date === this.selectedAttendanceDate) cls += ' selected';
-                    const inner = attended ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" style="width:.85rem;height:.85rem;"><polyline points="5 13 10 18 20 6"/></svg>' : label;
-                    return `<button type="button" class="${cls}" onclick="app.showAttendanceDetail('${date}')" title="${date}">${inner}</button>`;
-                }).join('');
-
+            // Updates the streak/month-count stats and check-in button wherever they
+            // appear (the compact Home card and the full Attendance tab both use this).
+            updateAttendanceSummary() {
+                const attended = this.getAttendedDateSet();
+                const today = this.todayStr();
                 const now = new Date();
-                const monthCount = Array.from(attendedDates).filter(dateStr => {
+                const monthCount = Array.from(attended).filter(dateStr => {
                     const d = new Date(dateStr + 'T00:00:00');
                     return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
                 }).length;
-                document.getElementById('attendanceMonthCount').textContent = `${monthCount} this month`;
+                const streak = this.computeAttendanceStreak();
 
-                const btn = document.getElementById('attendanceCheckInBtn');
-                const isClassDay = CONFIG.CLASS_DAYS.includes(now.getDay());
-                const alreadyIn = attendedDates.has(today);
-                if (alreadyIn) {
-                    btn.disabled = true;
-                    btn.innerHTML = `<i data-lucide="check-circle" style="width:14px;height:14px;"></i><span>Attended Today ✓</span>`;
-                } else if (!isClassDay) {
-                    btn.disabled = true;
-                    btn.innerHTML = `<i data-lucide="calendar-x" style="width:14px;height:14px;"></i><span>No Class Today</span>`;
-                } else {
-                    btn.disabled = false;
-                    btn.innerHTML = `<i data-lucide="check-circle" style="width:14px;height:14px;"></i><span>Check In Today's Class</span>`;
+                ['homeAttStreak', 'attStreakStat'].forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) el.textContent = streak;
+                });
+                ['homeAttMonth', 'attMonthStat'].forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) el.textContent = monthCount;
+                });
+
+                const rateEl = document.getElementById('attMonthRate');
+                if (rateEl) {
+                    let classDaysSoFar = 0;
+                    const cursor = new Date(now.getFullYear(), now.getMonth(), 1);
+                    while (cursor <= now) {
+                        if (CONFIG.CLASS_DAYS.includes(cursor.getDay())) classDaysSoFar++;
+                        cursor.setDate(cursor.getDate() + 1);
+                    }
+                    const rate = classDaysSoFar ? Math.round((monthCount / classDaysSoFar) * 100) : 0;
+                    rateEl.textContent = `${rate}% of classes this month`;
                 }
 
-                if (this.selectedAttendanceDate) this.renderAttendanceDetail();
+                const btn = document.getElementById('attCheckInBtn');
+                if (btn) {
+                    const isClassDay = CONFIG.CLASS_DAYS.includes(now.getDay());
+                    const alreadyIn = attended.has(today);
+                    if (alreadyIn) {
+                        btn.disabled = true;
+                        btn.innerHTML = `<i data-lucide="check-circle" style="width:14px;height:14px;"></i><span>Attended Today ✓</span>`;
+                    } else if (!isClassDay) {
+                        btn.disabled = true;
+                        btn.innerHTML = `<i data-lucide="calendar-x" style="width:14px;height:14px;"></i><span>No Class Today</span>`;
+                    } else {
+                        btn.disabled = false;
+                        btn.innerHTML = `<i data-lucide="check-circle" style="width:14px;height:14px;"></i><span>Check In Today's Class</span>`;
+                    }
+                }
+                this.icons();
+            }
+
+            changeAttCalMonth(delta) {
+                this.attCalMonth.setMonth(this.attCalMonth.getMonth() + delta);
+                this.renderAttendanceCalendar();
+            }
+
+            renderAttendanceCalendar() {
+                if (!this.attCalMonth) this.attCalMonth = new Date();
+                const monthCursor = this.attCalMonth;
+                const year = monthCursor.getFullYear();
+                const month = monthCursor.getMonth();
+                const label = document.getElementById('attCalLabel');
+                if (label) label.textContent = monthCursor.toLocaleDateString(undefined, { month: 'long', year: 'numeric' });
+
+                const attended = this.getAttendedDateSet();
+                const today = this.todayStr();
+                const firstOfMonth = new Date(year, month, 1);
+                const startWeekday = firstOfMonth.getDay();
+                const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+                const dow = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
+                let cells = dow.map(d => `<div class="cal-dow">${d}</div>`).join('');
+                for (let i = 0; i < startWeekday; i++) cells += `<div class="cal-day empty"></div>`;
+                for (let day = 1; day <= daysInMonth; day++) {
+                    const y = year, m = String(month + 1).padStart(2, '0'), d = String(day).padStart(2, '0');
+                    const dateStr = `${y}-${m}-${d}`;
+                    const isClassDay = CONFIG.CLASS_DAYS.includes(new Date(year, month, day).getDay());
+                    const isAttended = attended.has(dateStr);
+                    const isPast = dateStr < today;
+                    let cls = 'cal-day';
+                    if (isAttended) cls += ' has-entry';
+                    else if (isClassDay && isPast) cls += ' missed';
+                    if (dateStr === today) cls += ' today';
+                    if (dateStr === this.selectedAttendanceDate) cls += ' selected';
+                    cells += `<button type="button" class="${cls}" onclick="app.showAttendanceDetail('${dateStr}')" title="${dateStr}">
+                        <span>${day}</span>${isAttended ? '<span class="cal-dot"></span>' : ''}
+                    </button>`;
+                }
+
+                const grid = document.getElementById('attCalGrid');
+                if (grid) grid.innerHTML = cells;
                 this.icons();
             }
 
             showAttendanceDetail(date) {
                 this.selectedAttendanceDate = this.selectedAttendanceDate === date ? null : date;
-                this.renderAttendance();
+                this.renderAttendanceCalendar();
+                this.renderAttendanceDetail();
             }
 
             renderAttendanceDetail() {
                 const panel = document.getElementById('attendanceDetail');
+                if (!panel) return;
                 const date = this.selectedAttendanceDate;
                 if (!date) { panel.classList.add('hidden'); panel.innerHTML = ''; return; }
 
@@ -1374,7 +1573,8 @@ details.collapsible[open] .chevron { transform: rotate(180deg); }
                 try {
                     const record = await this.api('checkIn', { userId: this.currentUser.id });
                     this.attendance.unshift(record);
-                    this.renderAttendance();
+                    this.updateAttendanceSummary();
+                    this.renderAttendanceCalendar();
                 } catch (err) {
                     alert(err.message || 'Could not check in.');
                 }
@@ -1604,6 +1804,7 @@ details.collapsible[open] .chevron { transform: rotate(180deg); }
                     wrong: '', next: ''
                 };
 
+                const restore = this.setBtnLoading(e.target.querySelector('button[type="submit"]'), 'Logging...');
                 try {
                     const session = await this.api('logSession', payload);
                     this.sessions.unshift(session);
@@ -1615,6 +1816,8 @@ details.collapsible[open] .chevron { transform: rotate(180deg); }
                     this.renderDiary();
                 } catch (err) {
                     alert('Could not log roll: ' + err.message);
+                } finally {
+                    restore();
                 }
             }
 
@@ -1650,13 +1853,30 @@ details.collapsible[open] .chevron { transform: rotate(180deg); }
                 `;
             }
 
+            filterDiarySearch() {
+                this.diarySearchQuery = document.getElementById('diarySearchInput').value.trim().toLowerCase();
+                this.renderDiary();
+            }
+
+            // A session matches the search box if the query shows up in the
+            // position/technique, the reflection notes, or any partner's name
+            // from the positional/sparring trackers.
+            sessionMatchesSearch(s, query) {
+                if (!query) return true;
+                const partners = [...(s.positionalRounds || []), ...(s.sparringRounds || [])].map(r => r.partner || '');
+                const haystack = [s.position, s.wrong, s.next, ...partners].join(' ').toLowerCase();
+                return haystack.includes(query);
+            }
+
             renderDiary() {
                 const list = document.getElementById('diaryList');
                 const banner = document.getElementById('diaryFilterBanner');
+                const query = this.diarySearchQuery;
 
-                const filtered = this.selectedDiaryDate
+                let filtered = this.selectedDiaryDate
                     ? this.sessions.filter(s => s.date === this.selectedDiaryDate)
                     : this.sessions;
+                filtered = filtered.filter(s => this.sessionMatchesSearch(s, query));
 
                 if (this.selectedDiaryDate) {
                     banner.classList.remove('hidden');
@@ -1670,9 +1890,11 @@ details.collapsible[open] .chevron { transform: rotate(180deg); }
                 }
 
                 if (filtered.length === 0) {
-                    list.innerHTML = this.selectedDiaryDate
-                        ? `<p class="empty-state">No entries logged for ${this.selectedDiaryDate}.</p>`
-                        : `<p class="empty-state">No entries yet. Log your first session to start your diary.</p>`;
+                    list.innerHTML = query
+                        ? `<p class="empty-state">No entries match "${this.esc(document.getElementById('diarySearchInput').value)}".</p>`
+                        : this.selectedDiaryDate
+                            ? `<p class="empty-state">No entries logged for ${this.selectedDiaryDate}.</p>`
+                            : `<p class="empty-state">No entries yet. Log your first session to start your diary.</p>`;
                     this.icons();
                     return;
                 }
@@ -1794,7 +2016,43 @@ details.collapsible[open] .chevron { transform: rotate(180deg); }
                 document.getElementById('positionalDetails').open = posRows.length > 0;
                 document.getElementById('sparringDetails').open = sparRows.length > 0;
 
+                // Only nudge about struggling techniques when planning a NEW
+                // entry — not while reviewing/editing a past one.
+                if (session) {
+                    document.getElementById('strugglingTip').classList.add('hidden');
+                } else {
+                    this.renderStrugglingTip();
+                }
+
                 this.openModal('logSession');
+            }
+
+            // Surfaces Technique Journal entries marked "Struggling" as a gentle
+            // reminder right where a member is about to plan today's training.
+            renderStrugglingTip() {
+                const el = document.getElementById('strugglingTip');
+                const struggling = (this.userTechniques || []).filter(t => t.confidence === 'Struggling');
+                if (struggling.length === 0) {
+                    el.classList.add('hidden');
+                    el.innerHTML = '';
+                    return;
+                }
+                const names = struggling.slice(0, 3).map(t => this.esc(t.name)).join(', ');
+                el.classList.remove('hidden');
+                el.innerHTML = `
+                    <div class="card-flat flex items-start gap-2 text-xs" style="background:var(--warning-soft);border-color:transparent;">
+                        <i data-lucide="lightbulb" style="width:15px;height:15px;flex-shrink:0;margin-top:1px;color:var(--warning);"></i>
+                        <span style="flex:1;">You marked <strong>${names}</strong> as struggling — need to drill ${struggling.length > 1 ? 'these' : 'it'} today?</span>
+                        <button type="button" onclick="app.dismissStrugglingTip()" class="icon-btn" style="flex-shrink:0;width:1.4rem;height:1.4rem;"><i data-lucide="x" style="width:12px;height:12px;"></i></button>
+                    </div>
+                `;
+                this.icons();
+            }
+
+            dismissStrugglingTip() {
+                const el = document.getElementById('strugglingTip');
+                el.classList.add('hidden');
+                el.innerHTML = '';
             }
 
             clearLogSessionForm() {
@@ -1838,6 +2096,7 @@ details.collapsible[open] .chevron { transform: rotate(180deg); }
                     next: document.getElementById('logReflectNext').value
                 };
 
+                const restore = this.setBtnLoading(document.getElementById('logSessionSubmitBtn'), 'Saving...');
                 try {
                     if (sessionId) {
                         const updated = await this.api('updateSession', { ...payload, sessionId });
@@ -1855,6 +2114,8 @@ details.collapsible[open] .chevron { transform: rotate(180deg); }
                     this.renderDiary();
                 } catch (err) {
                     alert('Could not save session: ' + err.message);
+                } finally {
+                    restore();
                 }
             }
 
@@ -1890,6 +2151,7 @@ details.collapsible[open] .chevron { transform: rotate(180deg); }
                 }
                 const newPin = document.getElementById('profNewPinInput').value;
 
+                const restore = this.setBtnLoading(document.getElementById('saveProfileBtn'), 'Saving...');
                 try {
                     const updated = await this.api('updateProfile', {
                         userId: this.currentUser.id,
@@ -1911,6 +2173,8 @@ details.collapsible[open] .chevron { transform: rotate(180deg); }
                     alert('Profile updated successfully!');
                 } catch (err) {
                     alert('Could not save profile: ' + err.message);
+                } finally {
+                    restore();
                 }
             }
 
@@ -1944,6 +2208,7 @@ details.collapsible[open] .chevron { transform: rotate(180deg); }
                 e.preventDefault();
                 const title = document.getElementById('goalTitle').value;
                 const target = document.getElementById('goalTarget').value;
+                const restore = this.setBtnLoading(e.target.querySelector('button[type="submit"]'), 'Saving...');
                 try {
                     const goal = await this.api('addGoal', { userId: this.currentUser.id, title, target });
                     this.goals.push(goal);
@@ -1952,6 +2217,8 @@ details.collapsible[open] .chevron { transform: rotate(180deg); }
                     this.renderGoals();
                 } catch (err) {
                     alert('Could not add goal: ' + err.message);
+                } finally {
+                    restore();
                 }
             }
 
@@ -1993,6 +2260,7 @@ details.collapsible[open] .chevron { transform: rotate(180deg); }
 
             async submitAddTechnique(e) {
                 e.preventDefault();
+                const restore = this.setBtnLoading(e.target.querySelector('button[type="submit"]'), 'Saving...');
                 try {
                     const tech = await this.api('saveTechnique', {
                         userId: this.currentUser.id,
@@ -2007,6 +2275,8 @@ details.collapsible[open] .chevron { transform: rotate(180deg); }
                     this.renderPersonalJournal();
                 } catch (err) {
                     alert(err.message || 'Could not save technique.');
+                } finally {
+                    restore();
                 }
             }
 
@@ -2153,6 +2423,7 @@ details.collapsible[open] .chevron { transform: rotate(180deg); }
                     techniques: document.getElementById('acTechniques').value.split(',').map(t => t.trim()).filter(Boolean),
                     videoIds
                 };
+                const restore = this.setBtnLoading(e.target.querySelector('button[type="submit"]'), 'Saving...');
                 try {
                     const saved = await this.api('adminSaveClass', { requesterId: this.currentUser.id, requesterPin: this.adminPin, cls });
                     const idx = this.classes.findIndex(c => c.id === saved.id);
@@ -2162,6 +2433,8 @@ details.collapsible[open] .chevron { transform: rotate(180deg); }
                     this.renderAdminClasses();
                 } catch (err) {
                     alert('Could not save class: ' + err.message);
+                } finally {
+                    restore();
                 }
             }
 
@@ -2221,6 +2494,7 @@ details.collapsible[open] .chevron { transform: rotate(180deg); }
                     date: document.getElementById('avDate').value,
                     fbUrl: document.getElementById('avFbUrl').value
                 };
+                const restore = this.setBtnLoading(e.target.querySelector('button[type="submit"]'), 'Saving...');
                 try {
                     const saved = await this.api('adminSaveVideo', { requesterId: this.currentUser.id, requesterPin: this.adminPin, video });
                     const idx = this.videos.findIndex(v => v.id === saved.id);
@@ -2230,6 +2504,8 @@ details.collapsible[open] .chevron { transform: rotate(180deg); }
                     this.renderAdminVideos();
                 } catch (err) {
                     alert('Could not save video: ' + err.message);
+                } finally {
+                    restore();
                 }
             }
 
@@ -2283,6 +2559,7 @@ details.collapsible[open] .chevron { transform: rotate(180deg); }
             async submitAdminEditUser(e) {
                 e.preventDefault();
                 const userId = document.getElementById('auId').value;
+                const restore = this.setBtnLoading(e.target.querySelector('button[type="submit"]'), 'Saving...');
                 try {
                     await this.api('adminUpdateUser', {
                         requesterId: this.currentUser.id, requesterPin: this.adminPin,
@@ -2306,6 +2583,8 @@ details.collapsible[open] .chevron { transform: rotate(180deg); }
                     await this.loadAdminData();
                 } catch (err) {
                     alert('Could not update member: ' + err.message);
+                } finally {
+                    restore();
                 }
             }
 
@@ -2342,6 +2621,9 @@ details.collapsible[open] .chevron { transform: rotate(180deg); }
                     document.getElementById('plSection').value = 'sparring';
                     this.updatePartnerLogOutcomes();
                 }
+                if (id === 'RoundPairings') {
+                    this.loadTodayRoster();
+                }
                 document.getElementById(`modal${id.charAt(0).toUpperCase() + id.slice(1)}`).classList.remove('hidden');
                 this.icons();
             }
@@ -2350,9 +2632,203 @@ details.collapsible[open] .chevron { transform: rotate(180deg); }
                 document.getElementById(`modal${id.charAt(0).toUpperCase() + id.slice(1)}`).classList.add('hidden');
             }
 
+            // ---------------- ROUND TIMER ----------------
+            startRoundTimer() {
+                const roundMin = parseInt(document.getElementById('rtRoundMin').value || '0', 10) || 0;
+                const roundSec = parseInt(document.getElementById('rtRoundSec').value || '0', 10) || 0;
+                const restMin = parseInt(document.getElementById('rtRestMin').value || '0', 10) || 0;
+                const restSec = parseInt(document.getElementById('rtRestSec').value || '0', 10) || 0;
+                const totalRounds = Math.max(1, parseInt(document.getElementById('rtRounds').value || '1', 10) || 1);
+
+                const roundLen = roundMin * 60 + roundSec;
+                const restLen = restMin * 60 + restSec;
+                if (roundLen <= 0) { alert('Round length must be more than 0 seconds.'); return; }
+
+                this.rtState = { phase: 'round', remaining: roundLen, round: 1, totalRounds, roundLen, restLen, paused: false };
+                document.getElementById('rtSetup').classList.add('hidden');
+                document.getElementById('rtRunning').classList.remove('hidden');
+                document.getElementById('rtPauseBtn').innerHTML = `<i data-lucide="pause" style="width:14px;height:14px;"></i><span>Pause</span>`;
+                this.playRtBeep('round');
+                this.renderRoundTimer();
+                if (this.rtInterval) clearInterval(this.rtInterval);
+                this.rtInterval = setInterval(() => this.tickRoundTimer(), 1000);
+                this.icons();
+            }
+
+            tickRoundTimer() {
+                if (!this.rtState || this.rtState.paused) return;
+                const s = this.rtState;
+                s.remaining--;
+                if (s.remaining <= 0) {
+                    if (s.phase === 'round' && s.round >= s.totalRounds) {
+                        this.playRtBeep('end');
+                        clearInterval(this.rtInterval);
+                        this.rtInterval = null;
+                        document.getElementById('rtPhaseLabel').textContent = 'DONE';
+                        document.getElementById('rtClock').textContent = '00:00';
+                        document.getElementById('rtRoundCount').textContent = `Completed ${s.totalRounds} round${s.totalRounds === 1 ? '' : 's'}`;
+                        this.rtState = null;
+                        return;
+                    }
+                    if (s.phase === 'round') {
+                        if (s.restLen > 0) {
+                            s.phase = 'rest';
+                            s.remaining = s.restLen;
+                            this.playRtBeep('rest');
+                        } else {
+                            s.round++;
+                            s.remaining = s.roundLen;
+                            this.playRtBeep('round');
+                        }
+                    } else {
+                        s.round++;
+                        s.phase = 'round';
+                        s.remaining = s.roundLen;
+                        this.playRtBeep('round');
+                    }
+                }
+                this.renderRoundTimer();
+            }
+
+            renderRoundTimer() {
+                const s = this.rtState;
+                if (!s) return;
+                const mm = String(Math.floor(s.remaining / 60)).padStart(2, '0');
+                const ss = String(s.remaining % 60).padStart(2, '0');
+                document.getElementById('rtClock').textContent = `${mm}:${ss}`;
+                const label = document.getElementById('rtPhaseLabel');
+                label.textContent = s.phase === 'round' ? 'ROUND' : 'REST';
+                label.className = s.phase === 'round' ? 'badge badge-accent' : 'badge badge-warning';
+                document.getElementById('rtRoundCount').textContent = `Round ${s.round} of ${s.totalRounds}`;
+            }
+
+            pauseResumeRoundTimer() {
+                if (!this.rtState) return;
+                this.rtState.paused = !this.rtState.paused;
+                document.getElementById('rtPauseBtn').innerHTML = this.rtState.paused
+                    ? `<i data-lucide="play" style="width:14px;height:14px;"></i><span>Resume</span>`
+                    : `<i data-lucide="pause" style="width:14px;height:14px;"></i><span>Pause</span>`;
+                this.icons();
+            }
+
+            resetRoundTimer() {
+                if (this.rtInterval) clearInterval(this.rtInterval);
+                this.rtInterval = null;
+                this.rtState = null;
+                document.getElementById('rtSetup').classList.remove('hidden');
+                document.getElementById('rtRunning').classList.add('hidden');
+                this.icons();
+            }
+
+            closeRoundTimer() {
+                this.resetRoundTimer();
+                this.closeModal('RoundTimer');
+            }
+
+            // Synthesized beeps via Web Audio API — no external sound file needed,
+            // keeps the app a single self-contained file. Silently no-ops if the
+            // browser doesn't support it rather than breaking the timer.
+            playRtBeep(kind) {
+                try {
+                    if (!this.audioCtx) this.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                    const ctx = this.audioCtx;
+                    const now = ctx.currentTime;
+                    const beeps = kind === 'rest' ? [[440, 0, 0.3]]
+                        : kind === 'end' ? [[880, 0, 0.15], [880, 0.25, 0.15], [880, 0.5, 0.35]]
+                        : [[880, 0, 0.15], [880, 0.22, 0.25]];
+                    beeps.forEach(([freq, delay, dur]) => {
+                        const osc = ctx.createOscillator();
+                        const gain = ctx.createGain();
+                        osc.type = 'sine';
+                        osc.frequency.value = freq;
+                        gain.gain.setValueAtTime(0.0001, now + delay);
+                        gain.gain.exponentialRampToValueAtTime(0.3, now + delay + 0.02);
+                        gain.gain.exponentialRampToValueAtTime(0.0001, now + delay + dur);
+                        osc.connect(gain).connect(ctx.destination);
+                        osc.start(now + delay);
+                        osc.stop(now + delay + dur + 0.05);
+                    });
+                } catch (e) { /* Web Audio not available — timer still works, just silent */ }
+            }
+
+            // ---------------- ROUND PAIRINGS ----------------
+            async loadTodayRoster() {
+                document.getElementById('rpRosterList').innerHTML = '<p class="text-faint text-xs">Loading today\'s roster...</p>';
+                document.getElementById('rpPairingsResult').innerHTML = '';
+                try {
+                    const roster = await this.api('getTodayRoster');
+                    this.rpRoster = roster.map(u => ({ id: u.id, name: u.nickname || u.name, checked: true }));
+                } catch (err) {
+                    this.rpRoster = [];
+                }
+                this.renderRoster();
+            }
+
+            renderRoster() {
+                const el = document.getElementById('rpRosterList');
+                if (this.rpRoster.length === 0) {
+                    el.innerHTML = `<p class="text-faint text-xs">No one detected as checked in yet today — add names manually below.</p>`;
+                    return;
+                }
+                el.innerHTML = this.rpRoster.map((p, i) => `
+                    <label class="checkbox-row">
+                        <input type="checkbox" ${p.checked ? 'checked' : ''} onchange="app.toggleRosterPerson(${i})">
+                        <span>${this.esc(p.name)}</span>
+                    </label>
+                `).join('');
+            }
+
+            toggleRosterPerson(i) {
+                this.rpRoster[i].checked = !this.rpRoster[i].checked;
+            }
+
+            addManualRosterName() {
+                const input = document.getElementById('rpManualName');
+                const name = input.value.trim();
+                if (!name) return;
+                this.rpRoster.push({ id: 'manual_' + this.rpRoster.length + '_' + name, name, checked: true });
+                input.value = '';
+                this.renderRoster();
+            }
+
+            shuffleRoundPairings() {
+                const present = this.rpRoster.filter(p => p.checked);
+                const resultEl = document.getElementById('rpPairingsResult');
+                if (present.length < 2) {
+                    resultEl.innerHTML = `<p class="text-faint text-xs">Check at least 2 people to pair up.</p>`;
+                    return;
+                }
+                const shuffled = [...present];
+                for (let i = shuffled.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+                }
+                const pairs = [];
+                for (let i = 0; i < shuffled.length; i += 2) {
+                    if (i + 1 < shuffled.length) pairs.push([shuffled[i], shuffled[i + 1]]);
+                    else pairs.push([shuffled[i]]);
+                }
+                resultEl.innerHTML = pairs.map(pair => pair.length === 1
+                    ? `<div class="card-flat flex items-center justify-between"><span class="text-faint text-xs">Sits out this round</span><strong>${this.esc(pair[0].name)}</strong></div>`
+                    : `<div class="card-flat flex items-center justify-between"><strong>${this.esc(pair[0].name)}</strong><span class="text-faint">vs</span><strong>${this.esc(pair[1].name)}</strong></div>`
+                ).join('');
+            }
+
             // ---------------- UTIL ----------------
             show(id) { document.getElementById(id).classList.remove('hidden'); }
             hide(id) { document.getElementById(id).classList.add('hidden'); }
+
+            // Disables a submit button and swaps its label while a save is in
+            // flight, so a slow connection can't be double-tapped into creating a
+            // duplicate entry. Returns a restore function — always call it in a
+            // finally block so the button recovers even if the save fails.
+            setBtnLoading(btn, loadingText) {
+                if (!btn) return () => {};
+                const original = btn.innerHTML;
+                btn.disabled = true;
+                btn.innerHTML = `<span>${this.esc(loadingText || 'Saving...')}</span>`;
+                return () => { btn.disabled = false; btn.innerHTML = original; };
+            }
 
             esc(str) {
                 if (str === null || str === undefined) return '';
