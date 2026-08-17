@@ -244,6 +244,22 @@ select.input { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://ww
 .att-dot.today-pending { border-color: var(--gold); color: var(--gold); border-style: dashed; }
 .att-dot.selected { box-shadow: 0 0 0 2px var(--bg), 0 0 0 4px var(--gold); }
 
+.cal-nav { display: flex; align-items: center; justify-content: space-between; }
+.cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: .3rem; margin-top: .6rem; }
+.cal-dow { font-size: .6rem; font-weight: 800; color: var(--text-faint); text-align: center; text-transform: uppercase; padding-bottom: .2rem; }
+.cal-day { aspect-ratio: 1; border-radius: .6rem; border: 1px solid var(--border); background: var(--surface-2); color: var(--text-muted); font-size: .72rem; font-weight: 700; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: .2rem; cursor: pointer; transition: transform .1s ease; }
+.cal-day:active { transform: scale(0.92); }
+.cal-day.empty { visibility: hidden; cursor: default; }
+.cal-day.has-entry { border-color: var(--accent); background: var(--accent-soft); color: var(--accent-strong); }
+.cal-day.today { border-style: dashed; border-color: var(--gold); }
+.cal-day.selected { box-shadow: 0 0 0 2px var(--bg), 0 0 0 4px var(--gold); }
+.cal-day .cal-dot { width: .3rem; height: .3rem; border-radius: 999px; background: var(--accent-strong); }
+
+.diary-card { padding: .65rem .85rem; border-radius: .8rem; display: flex; flex-direction: column; gap: .35rem; }
+.diary-stats-row { display: flex; flex-wrap: wrap; gap: .15rem 1rem; font-size: .72rem; color: var(--text-muted); }
+.diary-stats-row strong { color: var(--text); font-weight: 700; }
+#diaryList.stack-2 > * + * { margin-top: .5rem; }
+
 .partner-row { display: flex; align-items: center; gap: .4rem; }
 .partner-row .input { font-size: .72rem; padding: .45rem .55rem; }
 
@@ -437,7 +453,6 @@ details.collapsible[open] .chevron { transform: rotate(180deg); }
             <div id="focusCard" class="hidden card-focus">
                 <div class="eyebrow flex items-center gap-2" style="color:var(--accent-strong);"><i data-lucide="target" style="width:14px;height:14px;"></i>Current Training Focus</div>
                 <h3 id="focusTopic" class="mt-1" style="font-size:1.05rem;font-weight:800;">—</h3>
-                <p id="focusSummary" class="text-xs text-muted mt-1" style="line-height:1.5;"></p>
                 <div class="card-flat flex items-center gap-2 mt-2">
                     <span class="badge badge-accent">Next Step</span>
                     <span id="focusNext" class="text-xs" style="font-weight:600;">—</span>
@@ -561,10 +576,17 @@ details.collapsible[open] .chevron { transform: rotate(180deg); }
                     <h1 class="h1">Personal Training Diary</h1>
                     <p class="text-xs text-muted mt-1">Your private history of mats, rolls, and feedback</p>
                 </div>
-                <button onclick="app.openLogSessionModal()" class="btn btn-primary btn-sm">
-                    <i data-lucide="plus" style="width:14px;height:14px;"></i><span>Log Entry</span>
-                </button>
+                <div class="flex items-center gap-1">
+                    <button onclick="app.toggleDiaryView()" id="diaryViewToggleBtn" class="btn btn-ghost btn-sm">
+                        <i data-lucide="calendar-days" style="width:14px;height:14px;"></i><span>Calendar</span>
+                    </button>
+                    <button onclick="app.openLogSessionModal()" class="btn btn-primary btn-sm">
+                        <i data-lucide="plus" style="width:14px;height:14px;"></i><span>Log Entry</span>
+                    </button>
+                </div>
             </div>
+            <div id="diaryCalendar" class="hidden card"></div>
+            <div id="diaryFilterBanner" class="hidden card-flat flex items-center justify-between text-xs"></div>
             <div id="diaryList" class="stack-2"></div>
         </section>
 
@@ -635,7 +657,7 @@ details.collapsible[open] .chevron { transform: rotate(180deg); }
                 <span>Home</span>
             </button>
             <button onclick="app.navigateTo('classes')" class="nav-item" data-view="classes">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="10" width="20" height="4" rx="1.5"/><rect x="9" y="6" width="6" height="12" rx="1"/></svg>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="16" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="8" y1="3" x2="8" y2="7"/><line x1="16" y1="3" x2="16" y2="7"/><circle cx="8" cy="14.5" r="1.1" fill="currentColor" stroke="none"/><circle cx="12" cy="14.5" r="1.1" fill="currentColor" stroke="none"/><circle cx="16" cy="14.5" r="1.1" fill="currentColor" stroke="none"/></svg>
                 <span>Classes</span>
             </button>
             <button onclick="app.navigateTo('videos')" class="nav-item" data-view="videos">
@@ -921,6 +943,9 @@ details.collapsible[open] .chevron { transform: rotate(180deg); }
                 this.adminUsers = [];
                 this.adminPin = null; // kept in memory only, never persisted
                 this.selectedAttendanceDate = null;
+                this.diaryView = 'list'; // 'list' or 'calendar'
+                this.diaryCalMonth = null; // Date set to the 1st of the month currently shown; set lazily on first calendar render
+                this.selectedDiaryDate = null;
 
                 this.initThemeToggle();
                 this.initNumericInputs();
@@ -1192,7 +1217,7 @@ details.collapsible[open] .chevron { transform: rotate(180deg); }
                 sleeve.style.background = user.belt === 'Black' ? '#b91c1c' : '#0b0a0c';
                 sleeve.innerHTML = '';
                 const stripeClass = user.belt === 'Black' ? 'belt-stripe black' : 'belt-stripe';
-                for (let i = 0; i < Number(user.stripes || 0); i++) {
+                for (let i = 0; i < (Number(user.stripes) || 0); i++) {
                     const st = document.createElement('div');
                     st.className = stripeClass;
                     sleeve.appendChild(st);
@@ -1206,8 +1231,8 @@ details.collapsible[open] .chevron { transform: rotate(180deg); }
 
                 document.getElementById('statSessions').textContent = this.sessions.length;
                 document.getElementById('statTechniques').textContent = this.classes.reduce((acc, c) => acc + (c.techniques || []).length, 0);
-                document.getElementById('statPositional').textContent = this.sessions.reduce((acc, s) => acc + Number(s.posRounds || 0), 0);
-                document.getElementById('statSparring').textContent = this.sessions.reduce((acc, s) => acc + (Number(s.sparWins || 0) + Number(s.sparLosses || 0) + Number(s.sparNeutral || 0)), 0);
+                document.getElementById('statPositional').textContent = this.sessions.reduce((acc, s) => acc + (Number(s.posRounds) || 0), 0);
+                document.getElementById('statSparring').textContent = this.sessions.reduce((acc, s) => acc + ((Number(s.sparWins) || 0) + (Number(s.sparLosses) || 0) + (Number(s.sparNeutral) || 0)), 0);
 
                 const recentList = document.getElementById('dashRecentSessions');
                 if (this.sessions.length === 0) {
@@ -1226,7 +1251,7 @@ details.collapsible[open] .chevron { transform: rotate(180deg); }
                                     </div>
                                 </div>
                             </div>
-                            <span class="text-xs mono text-faint" style="flex-shrink:0;">${Number(s.posRounds || 0) + (Number(s.sparWins || 0) + Number(s.sparLosses || 0) + Number(s.sparNeutral || 0))} Rds</span>
+                            <span class="text-xs mono text-faint" style="flex-shrink:0;">${(Number(s.posRounds) || 0) + ((Number(s.sparWins) || 0) + (Number(s.sparLosses) || 0) + (Number(s.sparNeutral) || 0))} Rds</span>
                         </div>
                     `).join('');
                 }
@@ -1239,12 +1264,6 @@ details.collapsible[open] .chevron { transform: rotate(180deg); }
 
                 const latest = this.sessions[0];
                 document.getElementById('focusTopic').textContent = latest.position;
-
-                if (Number(latest.posFail) > Number(latest.posSuccess)) {
-                    document.getElementById('focusSummary').textContent = `Summary: You experienced difficulty in ${latest.position} during recent positional rolls (${latest.posFail} failed attempts). ${latest.wrong || ''}`;
-                } else {
-                    document.getElementById('focusSummary').textContent = `Summary: You showed solid control in ${latest.position}. Focus on refining setups. ${latest.wrong || ''}`;
-                }
                 document.getElementById('focusNext').textContent = latest.next || 'Refine posture and inside position';
             }
 
@@ -1345,7 +1364,7 @@ details.collapsible[open] .chevron { transform: rotate(180deg); }
                     ${sessionsThatDay.length ? sessionsThatDay.map(s => `
                         <div class="flex items-center justify-between" style="padding:.25rem 0;">
                             <span class="text-muted">${this.esc(s.position)} · ${this.esc(s.gi)}</span>
-                            <span class="text-faint mono">${Number(s.posRounds || 0) + Number(s.sparWins || 0) + Number(s.sparLosses || 0) + Number(s.sparNeutral || 0)} rds</span>
+                            <span class="text-faint mono">${(Number(s.posRounds) || 0) + (Number(s.sparWins) || 0) + (Number(s.sparLosses) || 0) + (Number(s.sparNeutral) || 0)} rds</span>
                         </div>
                     `).join('') : '<p class="text-faint">No training session logged for this date.</p>'}
                 `;
@@ -1600,50 +1619,143 @@ details.collapsible[open] .chevron { transform: rotate(180deg); }
             }
 
             // ---------------- DIARY / LOG SESSION ----------------
+            sessionCardHTML(s) {
+                const posTotal = (Number(s.posSuccess) || 0) + (Number(s.posFail) || 0);
+                const sparTotal = (Number(s.sparWins) || 0) + (Number(s.sparLosses) || 0) + (Number(s.sparNeutral) || 0);
+                const partners = [...(s.positionalRounds || []), ...(s.sparringRounds || [])];
+                return `
+                    <div class="card diary-card">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-2" style="min-width:0;">
+                                <span class="text-xs mono" style="color:var(--accent-strong);font-weight:700;flex-shrink:0;">${this.esc(s.date)}</span>
+                                <h3 style="font-size:.82rem;font-weight:800;overflow-wrap:break-word;">${this.esc(s.position)}</h3>
+                                <span class="badge badge-neutral" style="flex-shrink:0;">${this.esc(s.gi)}</span>
+                            </div>
+                            <div class="flex items-center gap-1" style="flex-shrink:0;">
+                                <button onclick="app.openLogSessionModal('${s.id}')" class="icon-btn accent"><i data-lucide="pencil" style="width:13px;height:13px;"></i></button>
+                                <button onclick="app.deleteSession('${s.id}')" class="icon-btn danger"><i data-lucide="trash-2" style="width:13px;height:13px;"></i></button>
+                            </div>
+                        </div>
+                        <div class="diary-stats-row">
+                            ${posTotal ? `<span><strong>Pos</strong> ${(Number(s.posSuccess) || 0)}/${(Number(s.posFail) || 0)} · ${(Number(s.posRounds) || 0)} rds</span>` : ''}
+                            ${sparTotal ? `<span><strong>Spar</strong> ${(Number(s.sparWins) || 0)}W-${(Number(s.sparLosses) || 0)}L-${(Number(s.sparNeutral) || 0)}N</span>` : ''}
+                        </div>
+                        ${partners.length ? `
+                            <div class="flex flex-wrap gap-1">
+                                ${partners.map(r => `<span class="badge badge-neutral">${this.esc(r.partner)} · ${this.esc(r.outcome)}</span>`).join('')}
+                            </div>
+                        ` : ''}
+                        ${s.wrong ? `<p class="text-xs" style="color:var(--text-muted);"><strong style="color:var(--accent-strong);">Issue:</strong> ${this.esc(s.wrong)} <strong style="color:var(--success);">→ Next:</strong> ${this.esc(s.next)}</p>` : ''}
+                    </div>
+                `;
+            }
+
             renderDiary() {
                 const list = document.getElementById('diaryList');
-                if (this.sessions.length === 0) {
-                    list.innerHTML = `<p class="empty-state">No entries yet. Log your first session to start your diary.</p>`;
+                const banner = document.getElementById('diaryFilterBanner');
+
+                const filtered = this.selectedDiaryDate
+                    ? this.sessions.filter(s => s.date === this.selectedDiaryDate)
+                    : this.sessions;
+
+                if (this.selectedDiaryDate) {
+                    banner.classList.remove('hidden');
+                    banner.innerHTML = `
+                        <span>Showing entries for <strong>${this.selectedDiaryDate}</strong></span>
+                        <button onclick="app.clearDiaryDateFilter()" class="btn btn-ghost btn-sm">Show All</button>
+                    `;
+                } else {
+                    banner.classList.add('hidden');
+                    banner.innerHTML = '';
+                }
+
+                if (filtered.length === 0) {
+                    list.innerHTML = this.selectedDiaryDate
+                        ? `<p class="empty-state">No entries logged for ${this.selectedDiaryDate}.</p>`
+                        : `<p class="empty-state">No entries yet. Log your first session to start your diary.</p>`;
+                    this.icons();
                     return;
                 }
-                list.innerHTML = this.sessions.map(s => `
-                    <div class="card stack-2">
-                        <div class="flex items-center justify-between" style="border-bottom:1px solid var(--border);padding-bottom:.6rem;">
-                            <div>
-                                <span class="text-xs mono" style="color:var(--accent-strong);font-weight:700;">${this.esc(s.date)}</span>
-                                <h3 style="font-size:.9rem;font-weight:800;">${this.esc(s.position)}</h3>
-                            </div>
-                            <div class="flex items-center gap-1">
-                                <span class="badge badge-neutral">${this.esc(s.gi)}</span>
-                                <button onclick="app.openLogSessionModal('${s.id}')" class="icon-btn accent"><i data-lucide="pencil" style="width:14px;height:14px;"></i></button>
-                                <button onclick="app.deleteSession('${s.id}')" class="icon-btn danger"><i data-lucide="trash-2" style="width:14px;height:14px;"></i></button>
-                            </div>
-                        </div>
-                        <div class="grid-2 text-xs">
-                            <div class="card-flat">
-                                <span class="eyebrow" style="font-size:.6rem;">Positional</span>
-                                <p class="mono mt-1">${s.posSuccess} Clean / ${s.posFail} Failed (${s.posRounds} Rounds)</p>
-                            </div>
-                            <div class="card-flat">
-                                <span class="eyebrow" style="font-size:.6rem;">Sparring Rolls</span>
-                                <p class="mono mt-1">${s.sparWins} W - ${s.sparLosses} L - ${s.sparNeutral} N</p>
-                            </div>
-                        </div>
-                        ${(s.positionalRounds || []).length || (s.sparringRounds || []).length ? `
-                            <div class="flex flex-wrap gap-1">
-                                ${(s.positionalRounds || []).map(r => `<span class="badge badge-neutral">${this.esc(r.partner)} · ${this.esc(r.outcome)}</span>`).join('')}
-                                ${(s.sparringRounds || []).map(r => `<span class="badge badge-neutral">${this.esc(r.partner)} · ${this.esc(r.outcome)}</span>`).join('')}
-                            </div>
-                        ` : ''}
-                        ${s.wrong ? `
-                            <div class="card-flat text-xs stack-1" style="background:var(--accent-soft);border-color:transparent;">
-                                <p><strong style="color:var(--accent-strong);">Issue:</strong> ${this.esc(s.wrong)}</p>
-                                <p><strong style="color:var(--success);">Next Focus:</strong> ${this.esc(s.next)}</p>
-                            </div>
-                        ` : ''}
-                    </div>
-                `).join('');
+                list.innerHTML = filtered.map(s => this.sessionCardHTML(s)).join('');
                 this.icons();
+            }
+
+            toggleDiaryView() {
+                this.diaryView = this.diaryView === 'list' ? 'calendar' : 'list';
+                const cal = document.getElementById('diaryCalendar');
+                const btn = document.getElementById('diaryViewToggleBtn');
+                if (this.diaryView === 'calendar') {
+                    if (!this.diaryCalMonth) this.diaryCalMonth = new Date();
+                    cal.classList.remove('hidden');
+                    btn.innerHTML = `<i data-lucide="list" style="width:14px;height:14px;"></i><span>List</span>`;
+                    this.renderDiaryCalendar();
+                } else {
+                    cal.classList.add('hidden');
+                    btn.innerHTML = `<i data-lucide="calendar-days" style="width:14px;height:14px;"></i><span>Calendar</span>`;
+                }
+                this.icons();
+            }
+
+            changeDiaryCalMonth(delta) {
+                this.diaryCalMonth.setMonth(this.diaryCalMonth.getMonth() + delta);
+                this.renderDiaryCalendar();
+            }
+
+            // Every date (YYYY-MM-DD) that has at least one diary entry logged.
+            getDiaryEntryDateSet() {
+                return new Set(this.sessions.map(s => s.date).filter(Boolean));
+            }
+
+            renderDiaryCalendar() {
+                const cal = document.getElementById('diaryCalendar');
+                const monthCursor = this.diaryCalMonth;
+                const year = monthCursor.getFullYear();
+                const month = monthCursor.getMonth();
+                const monthLabel = monthCursor.toLocaleDateString(undefined, { month: 'long', year: 'numeric' });
+                const entryDates = this.getDiaryEntryDateSet();
+                const today = this.todayStr();
+
+                const firstOfMonth = new Date(year, month, 1);
+                const startWeekday = firstOfMonth.getDay(); // 0=Sun
+                const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+                const dow = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
+                let cells = dow.map(d => `<div class="cal-dow">${d}</div>`).join('');
+                for (let i = 0; i < startWeekday; i++) cells += `<div class="cal-day empty"></div>`;
+                for (let day = 1; day <= daysInMonth; day++) {
+                    const y = year, m = String(month + 1).padStart(2, '0'), d = String(day).padStart(2, '0');
+                    const dateStr = `${y}-${m}-${d}`;
+                    const hasEntry = entryDates.has(dateStr);
+                    let cls = 'cal-day';
+                    if (hasEntry) cls += ' has-entry';
+                    if (dateStr === today) cls += ' today';
+                    if (dateStr === this.selectedDiaryDate) cls += ' selected';
+                    cells += `<button type="button" class="${cls}" onclick="app.selectDiaryDate('${dateStr}')" title="${dateStr}">
+                        <span>${day}</span>${hasEntry ? '<span class="cal-dot"></span>' : ''}
+                    </button>`;
+                }
+
+                cal.innerHTML = `
+                    <div class="cal-nav">
+                        <button type="button" onclick="app.changeDiaryCalMonth(-1)" class="icon-btn"><i data-lucide="chevron-left" style="width:16px;height:16px;"></i></button>
+                        <span style="font-weight:800;font-size:.85rem;">${monthLabel}</span>
+                        <button type="button" onclick="app.changeDiaryCalMonth(1)" class="icon-btn"><i data-lucide="chevron-right" style="width:16px;height:16px;"></i></button>
+                    </div>
+                    <div class="cal-grid">${cells}</div>
+                `;
+                this.icons();
+            }
+
+            selectDiaryDate(dateStr) {
+                this.selectedDiaryDate = this.selectedDiaryDate === dateStr ? null : dateStr;
+                if (this.diaryView === 'calendar') this.renderDiaryCalendar();
+                this.renderDiary();
+            }
+
+            clearDiaryDateFilter() {
+                this.selectedDiaryDate = null;
+                if (this.diaryView === 'calendar') this.renderDiaryCalendar();
+                this.renderDiary();
             }
 
             openLogSessionModal(sessionId) {
